@@ -3,32 +3,36 @@ import h5py
 import scipy.io
 np.random.seed(1337) # for reproducibility
 
-from keras.preprocessing import sequence
-from keras.optimizers import RMSprop
 from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation, Flatten
 from keras.layers.convolutional import Convolution1D, MaxPooling1D
-from keras.regularizers import l2, activity_l1
-from keras.constraints import maxnorm
 from keras.layers.recurrent import LSTM, GRU
 from keras.callbacks import ModelCheckpoint, EarlyStopping
-from seya.layers.recurrent import Bidirectional
-from keras.utils.layer_utils import print_layer_shapes
+# from seya.layers.recurrent import Bidirectional
+
+from keras.layers import Bidirectional
 
 
-print 'loading data'
+print('#### Loading DATA ###########################################')
+print("-- Loading Training Set")
 trainmat = h5py.File('data/train.mat')
+print("-- Loading Validation Set")
 validmat = scipy.io.loadmat('data/valid.mat')
+print("-- Loading Test Set")
 testmat = scipy.io.loadmat('data/test.mat')
 
+print("### Dividing Training data into X_train and y_train #########")
+print("-- setting up X_train")
 X_train = np.transpose(np.array(trainmat['trainxdata']),axes=(2,0,1))
+print("-- setting up y_train")
 y_train = np.array(trainmat['traindata']).T
 
+print("Setting up B-RNN Layer")
 forward_lstm = LSTM(input_dim=320, output_dim=320, return_sequences=True)
 backward_lstm = LSTM(input_dim=320, output_dim=320, return_sequences=True)
-brnn = Bidirectional(forward=forward_lstm, backward=backward_lstm, return_sequences=True)
+brnn = Bidirectional(layer=forward_lstm, backward_layer=backward_lstm, return_sequences=True)
 
-print 'building model'
+print('### Building Model ##########################')
 
 model = Sequential()
 model.add(Convolution1D(input_dim=4,
@@ -55,10 +59,10 @@ model.add(Activation('relu'))
 model.add(Dense(input_dim=925, output_dim=919))
 model.add(Activation('sigmoid'))
 
-print 'compiling model'
+print('compiling model')
 model.compile(loss='binary_crossentropy', optimizer='rmsprop', class_mode="binary")
 
-print 'running at most 60 epochs'
+print('running at most 60 epochs')
 
 checkpointer = ModelCheckpoint(filepath="DanQ_bestmodel.hdf5", verbose=1, save_best_only=True)
 earlystopper = EarlyStopping(monitor='val_loss', patience=5, verbose=1)
@@ -67,5 +71,5 @@ model.fit(X_train, y_train, batch_size=100, nb_epoch=60, shuffle=True, show_accu
 
 tresults = model.evaluate(np.transpose(testmat['testxdata'],axes=(0,2,1)), testmat['testdata'],show_accuracy=True)
 
-print tresults
+print(tresults)
 
