@@ -41,11 +41,10 @@ model.add(Conv1D(
                 input_dim=4,
                 input_length=1000,
                 activation="relu",
-                
-                border_mode="valid",
-                subsample_length=1))
+                padding="valid",
+                strides=1))
 
-model.add(MaxPooling1D(pool_length=13, stride=13))
+model.add(MaxPooling1D(pool_size=13, strides=13))
 
 model.add(Dropout(0.2))
 
@@ -55,23 +54,26 @@ model.add(Dropout(0.5))
 
 model.add(Flatten())
 
-model.add(Dense(input_dim=75*640, output_dim=925))
+model.add(Dense(input_dim=75*640, units=925))
 model.add(Activation('relu'))
 
-model.add(Dense(input_dim=925, output_dim=919))
+model.add(Dense(input_dim=925, units=919))
 model.add(Activation('sigmoid'))
 
 print('compiling model')
-model.compile(loss='binary_crossentropy', optimizer='rmsprop', class_mode="binary")
+model.compile(loss='binary_crossentropy', optimizer='rmsprop', class_mode="binary", metrics=["accuracy"])
 
 print('running at most 60 epochs')
 
 checkpointer = ModelCheckpoint(filepath="DanQ_bestmodel.hdf5", verbose=1, save_best_only=True)
 earlystopper = EarlyStopping(monitor='val_loss', patience=5, verbose=1)
 
-model.fit(X_train, y_train, batch_size=100, nb_epoch=60, shuffle=True, show_accuracy=True, validation_data=(np.transpose(validmat['validxdata'],axes=(0,2,1)), validmat['validdata']), callbacks=[checkpointer,earlystopper])
+model.fit(X_train, y_train, batch_size=100, epochs=60, shuffle=True,
+        validation_data=(np.transpose(validmat['validxdata'],axes=(0,2,1)),
+        validmat['validdata']), callbacks=[checkpointer,earlystopper]
+    )
 
-tresults = model.evaluate(np.transpose(testmat['testxdata'],axes=(0,2,1)), testmat['testdata'],show_accuracy=True)
+tresults = model.evaluate(np.transpose(testmat['testxdata'],axes=(0,2,1)), testmat['testdata'])
 
 print(tresults)
 
