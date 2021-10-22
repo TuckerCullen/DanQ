@@ -3,9 +3,9 @@ import h5py
 import scipy.io
 np.random.seed(1337) # for reproducibility
 
-from keras.models import Sequential
+from keras import Sequential
 from keras.layers.core import Dense, Dropout, Activation, Flatten
-from keras.layers.convolutional import Convolution1D, MaxPooling1D
+from keras.layers.convolutional import Conv1D, MaxPooling1D
 from keras.layers.recurrent import LSTM, GRU
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 # from seya.layers.recurrent import Bidirectional
@@ -28,20 +28,22 @@ print("-- setting up y_train")
 y_train = np.array(trainmat['traindata']).T
 
 print("Setting up B-RNN Layer")
-forward_lstm = LSTM(input_dim=320, output_dim=320, return_sequences=True)
-backward_lstm = LSTM(input_dim=320, output_dim=320, return_sequences=True)
-brnn = Bidirectional(layer=forward_lstm, backward_layer=backward_lstm, return_sequences=True)
+forward_lstm = LSTM(units=320, input_dim=320, return_sequences=True)
+backward_lstm = LSTM(units=320, input_dim=320, return_sequences=True)
+brnn = Bidirectional(layer=forward_lstm, backward_layer=backward_lstm)
 
 print('### Building Model ##########################')
 
 model = Sequential()
-model.add(Convolution1D(input_dim=4,
-                        input_length=1000,
-                        nb_filter=320,
-                        filter_length=26,
-                        border_mode="valid",
-                        activation="relu",
-                        subsample_length=1))
+model.add(Conv1D(
+                filter=320,
+                kernal_size=26,
+                input_dim=4,
+                input_length=1000,
+                activation="relu",
+                
+                border_mode="valid",
+                subsample_length=1))
 
 model.add(MaxPooling1D(pool_length=13, stride=13))
 
