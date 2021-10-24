@@ -20,7 +20,7 @@ forward_lstm = LSTM(input_dim=320, output_dim=320, return_sequences=True)
 backward_lstm = LSTM(input_dim=320, output_dim=320, return_sequences=True)
 brnn = Bidirectional(forward=forward_lstm, backward=backward_lstm, return_sequences=True)
 
-print 'building model'
+print('building model')
 
 model = Sequential()
 model.add(Convolution1D(input_dim=4,
@@ -47,21 +47,21 @@ model.add(Activation('relu'))
 model.add(Dense(input_dim=925, output_dim=919))
 model.add(Activation('sigmoid'))
 
-print 'compiling model'
+print('compiling model')
 model.compile(loss='binary_crossentropy', optimizer='rmsprop', class_mode="binary")
 
 
 model.load_weights('data/DanQ_bestmodel.hdf5')
 
-print 'loading test data'
+print('loading test data')
 testmat = h5py.File(sys.argv[1],'r')
 x = np.transpose(testmat['testxdata'].value,axes=(0,2,1))
 testmat.close()
 
-print 'predicting on test sequences'
+print('predicting on test sequences')
 y = model.predict(x, verbose=1)
 
-print "saving to " + sys.argv[2]
+print("saving to " + sys.argv[2])
 f = h5py.File(sys.argv[2], "w")
 f.create_dataset("pred", data=y)
 f.close()
