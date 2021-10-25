@@ -12,10 +12,9 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 from keras.layers import Bidirectional
 
-
 print('#### Loading DATA ###########################################')
 print("-- Loading Training Set")
-trainmat = scipy.io.loadmat('data/train_trunc.mat')
+trainmat = scipy.io.loadmat('data/train_trunc.mat') #FOR TRUNC: needed to change this to scipy.loadmat instead of h5py.File
 print("-- Loading Validation Set")
 validmat = scipy.io.loadmat('data/valid.mat')
 print("-- Loading Test Set")
@@ -23,9 +22,9 @@ testmat = scipy.io.loadmat('data/test_trunc.mat')
 
 print("### Dividing Training data into X_train and y_train #########")
 print("-- setting up X_train")
-X_train = np.transpose(np.array(trainmat['trainx_trunc']),axes=(2,0,1))
+X_train = np.transpose(np.array(trainmat['trainx_trunc']),axes=(0,2,1)) # FOR TRUNC: switched transpose axes from to (2, 0, 1) to (0, 2, 1)
 print("-- setting up y_train")
-y_train = np.array(trainmat['train_trunc']).T
+y_train = np.array(trainmat['train_trunc']) # FOR TRUNC: remove the transpose
 
 print("Setting up B-RNN Layer")
 forward_lstm = LSTM(units=320, input_dim=320, return_sequences=True)
